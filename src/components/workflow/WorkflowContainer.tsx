@@ -27,18 +27,17 @@ const WorkflowContainer = () => {
     <div className="min-h-screen bg-background">
       <div className=" mx-auto px-4 py-8">
 
-         {/* Header */}
-              <div className="flex items-center justify-between pb-2">
-                <div className="flex items-center gap-3">
-                  <Building2 className="w-6 h-6 text-primary" />
-                  <span className="text-2xl font-semibold text-foreground">Sarvodaya Hospital</span>
-                </div>
-              </div>
+        {/* Header */}
+        <div className="flex items-center justify-between pb-2">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl font-semibold text-foreground">Sarvodaya Hospital</span>
+          </div>
+        </div>
 
         {
-           <StepIndicator currentStep={step} />
+          <StepIndicator currentStep={step} />
         }
-        
+
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -47,30 +46,30 @@ const WorkflowContainer = () => {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.25 }}
           >
-            {/* {step === 1 && (
+            {step === 1 && (
               <div className="max-w-7xl pt-2 mx-auto">
                 <Step1CaseForm formData={formData} onChange={updateForm} onNext={() => goTo(2)} />
               </div>
-            )} */}
+            )}
             {step === 2 && (
               <div className="max-w-7xl pt-2 mx-auto">
-              <Step2DocumentChecklist
-                formData={formData}
-                documents={documents}
-                onDocumentsChange={setDocuments}
-                onNext={() => goTo(3)}
-                onBack={() => goTo(1)}
-              />
+                <Step2DocumentChecklist
+                  formData={formData}
+                  documents={documents}
+                  onDocumentsChange={setDocuments}
+                  onNext={() => goTo(3)}
+                  onBack={() => goTo(1)}
+                />
               </div>
             )}
             {step === 3 && (
               <div className="max-w-7xl pt-2 mx-auto">
-              <Step3CompileValidation
-                documents={documents}
-                onBack={() => goTo(2)}
-                onNext={() => goTo(4)}
-                onScrollToMissing={() => {}}
-              />
+                <Step3CompileValidation
+                  documents={documents}
+                  onBack={() => goTo(2)}
+                  onNext={() => goTo(4)}
+                  onScrollToMissing={() => { }}
+                />
               </div>
             )}
             {step === 4 && (
@@ -78,9 +77,9 @@ const WorkflowContainer = () => {
                 <Step4AuditSimulation onNext={() => goTo(5)} />
               </div>
             )}
-            {step === 1 && (
+            {step === 5 && (
               <div className="max-w-8xl pt-2 mx-auto">
-              <Step5DocumentReorder documents={documents} />
+                <Step5DocumentReorder documents={documents} />
               </div>
             )}
           </motion.div>
