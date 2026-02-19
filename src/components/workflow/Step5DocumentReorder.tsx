@@ -72,9 +72,8 @@ const SortableCard = ({ segment, order }: { segment: PdfSegment; order: number }
       ref={setNodeRef}
       style={style}
       layout
-      className={`gov-card !p-0 overflow-hidden transition-shadow duration-200 ${
-        isDragging ? 'shadow-xl ring-2 ring-primary/30 scale-[1.02]' : 'hover:shadow-md'
-      }`}
+      className={`gov-card !p-0 overflow-hidden transition-shadow duration-200 ${isDragging ? 'shadow-xl ring-2 ring-primary/30 scale-[1.02]' : 'hover:shadow-md'
+        }`}
     >
       {/* Order Badge */}
       <div className="relative">
@@ -83,20 +82,20 @@ const SortableCard = ({ segment, order }: { segment: PdfSegment; order: number }
         </div>
       </div>
 
-      <div className="p-4 pt-3">
+      <div className="p-3 pt-2">
         {/* Thumbnail */}
-        <div className="mb-3 mx-auto w-24">
+        <div className="mb-2 mx-auto w-16">
           <MiniThumbnail name={segment.name} />
         </div>
 
         {/* Info */}
-        <div className="text-center space-y-1">
-          <h4 className="text-sm font-semibold text-foreground leading-tight">{segment.name}</h4>
-          <p className="text-xs text-muted-foreground">{segment.pages} {segment.pages === 1 ? 'Page' : 'Pages'}</p>
+        <div className="text-center space-y-0.5">
+          <h4 className="text-xs font-semibold text-foreground leading-tight">{segment.name}</h4>
+          <p className="text-[10px] text-muted-foreground">{segment.pages} {segment.pages === 1 ? 'Page' : 'Pages'}</p>
         </div>
 
         {/* Drag Handle */}
-        <div className="flex justify-center mt-3">
+        <div className="flex justify-center mt-2">
           <button
             {...attributes}
             {...listeners}
@@ -117,7 +116,7 @@ const SimulatedPdfPage = ({ segmentName, pageNum, globalPage, totalPages }: {
   globalPage: number;
   totalPages: number;
 }) => (
-  <div className="w-[400px] min-h-[400px] bg-card rounded-lg border border-border shadow-md mx-auto flex flex-col">
+  <div className="w-[794px] min-h-[1123px] bg-card rounded-lg border border-border shadow-md mx-auto flex flex-col">
     {/* Page Header */}
     <div className="text-center pt-6 pb-3 border-b border-border mx-6">
       <p className="text-sm font-semibold text-foreground">{segmentName}</p>
@@ -275,7 +274,7 @@ const Step5DocumentReorder = ({ documents: _docs }: Props) => {
   const hasErrors = errors.length > 0 && !errorsDismissed;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 overflow-y-hidden">
       {/* Override Modal */}
       <AnimatePresence>
         {showOverrideModal && (
@@ -284,94 +283,105 @@ const Step5DocumentReorder = ({ documents: _docs }: Props) => {
       </AnimatePresence>
 
       {/* 🟥 ERROR PANEL */}
-      {hasErrors && (
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border border-destructive/20 bg-destructive/5 p-5 space-y-4"
-        >
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-destructive" />
-            <h3 className="text-base font-semibold text-foreground">Backend Document Review Alerts</h3>
-          </div>
 
-          <ul className="space-y-2">
-            {errors.map(err => (
-              <li key={err.id} className="flex items-start gap-2 text-sm text-foreground">
-                <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />
-                {err.message}
-              </li>
-            ))}
-          </ul>
-
-          <label className="flex items-start gap-3 cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={errorsReviewed}
-              onChange={e => setErrorsReviewed(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary/30 accent-primary"
-            />
-            <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-              I have manually reviewed the documents and confirm they are correct.
-            </span>
-          </label>
-
-          <div className="flex gap-3 pt-1">
-            <button className="gov-btn-secondary">
-              <Upload className="w-4 h-4" /> Re-upload Documents
-            </button>
-            <button
-              onClick={handleProceedAnyway}
-              disabled={!errorsReviewed}
-              className="gov-btn-primary"
-            >
-              Proceed to Compile Anyway <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </motion.div>
-      )}
 
       {/* MAIN SPLIT VIEW */}
       <div className="flex gap-6">
         {/* 🟦 LEFT PANEL – Draggable Cards */}
-        <div className="w-[40%] shrink-0 space-y-4">
+        <div className="flex flex-col w-[40%] gap-6">
+          <div className="w-full shrink-0 space-y-4">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">Compiled PDF Segments</h3>
+              <p className="text-sm text-muted-foreground mt-1">Drag cards to rearrange final compilation order</p>
+            </div>
+
+            <div className="max-h-[50vh] overflow-y-auto pr-1 space-y-3">
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={segments.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                  <div className="grid grid-cols-3 gap-3">
+                    {segments.map((seg, i) => (
+                      <SortableCard key={seg.id} segment={seg} order={i + 1} />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            </div>
+
+            {!hasErrors && (
+              <div className="flex gap-3 pt-2">
+                <button className="gov-btn-secondary">
+                  <Save className="w-4 h-4" /> Save Order
+                </button>
+                <button onClick={handleRegenerate} className="gov-btn-primary">
+                  <RefreshCw className="w-4 h-4" /> Regenerate Final PDF
+                </button>
+              </div>
+            )}
+          </div>
+
           <div>
-            <h3 className="text-base font-semibold text-foreground">Compiled PDF Segments</h3>
-            <p className="text-sm text-muted-foreground mt-1">Drag cards to rearrange final compilation order</p>
-          </div>
-
-          <div className="max-h-[70vh] overflow-y-auto pr-1 space-y-3">
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={segments.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                <div className="grid grid-cols-2 gap-3">
-                  {segments.map((seg, i) => (
-                    <SortableCard key={seg.id} segment={seg} order={i + 1} />
-                  ))}
+            {hasErrors && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 space-y-3"
+              >
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-destructive" />
+                  <h3 className="text-sm font-semibold text-foreground">Backend Document Review Alerts</h3>
                 </div>
-              </SortableContext>
-            </DndContext>
+
+                <ul className="space-y-1">
+                  {errors.map(err => (
+                    <li key={err.id} className="flex items-start gap-2 text-xs text-foreground">
+                      <span className="mt-1 w-1 h-1 rounded-full bg-destructive shrink-0" />
+                      {err.message}
+                    </li>
+                  ))}
+                </ul>
+
+                <label className="flex items-start gap-2 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={errorsReviewed}
+                    onChange={e => setErrorsReviewed(e.target.checked)}
+                    className="mt-0.5 h-3 w-3 rounded border-border text-primary focus:ring-primary/30 accent-primary"
+                  />
+                  <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                    I have manually reviewed the documents and confirm they are correct.
+                  </span>
+                </label>
+
+                <div className="flex gap-2 pt-1">
+                  <button className="gov-btn-secondary text-xs py-1.5 px-3 h-8">
+                    <Upload className="w-3 h-3" /> Re-upload
+                  </button>
+                  <button
+                    onClick={handleProceedAnyway}
+                    disabled={!errorsReviewed}
+                    className="gov-btn-primary text-xs py-1.5 px-3 h-8"
+                  >
+                    Proceed Anyway <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
           </div>
 
-          <div className="flex gap-3 pt-2">
-            <button className="gov-btn-secondary">
-              <Save className="w-4 h-4" /> Save Order
-            </button>
-            <button onClick={handleRegenerate} className="gov-btn-primary">
-              <RefreshCw className="w-4 h-4" /> Regenerate Final PDF
-            </button>
-          </div>
         </div>
+
 
         {/* 🟩 RIGHT PANEL – Scrollable PDF Preview */}
         <div className="flex-1 min-w-0">
-          <div className="sticky top-6">
+          <div className=" ">
             <div className="gov-card !p-5 space-y-4">
               <div>
                 <h3 className="text-base font-semibold text-foreground">Live PDF Preview</h3>
                 <p className="text-sm text-muted-foreground mt-1">Scrollable preview reflecting current order</p>
               </div>
 
-              <div className="max-h-[65vh] overflow-y-auto space-y-4 px-1 py-2">
+              <div className="max-h-[75vh] overflow-y-auto space-y-12 px-1 py-2">
                 {previewPages.map((page, idx) => (
                   <motion.div key={`${page.segmentName}-${page.pageNum}`} layout transition={{ duration: 0.3 }}>
                     <SimulatedPdfPage

@@ -9,10 +9,10 @@ interface Props {
   onNext: () => void;
 }
 
-const Field = ({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) => (
+const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div>
     <label className="gov-label">
-      {label} {required && <span className="text-destructive">*</span>}
+      {label}
     </label>
     {children}
   </div>
@@ -54,26 +54,8 @@ const Step1CaseForm = ({ formData, onChange, onNext }: Props) => {
     : [];
 
   const validate = () => {
-    const errs: Record<string, string> = {};
-    if (!formData.fullName.trim()) errs.fullName = 'Required';
-    if (!formData.mobileNumber.trim()) errs.mobileNumber = 'Required';
-    if (!formData.treatmentCategory) errs.treatmentCategory = 'Required';
-    if (!formData.hospitalName.trim()) errs.hospitalName = 'Required';
-    if (!formData.admissionDate) errs.admissionDate = 'Required';
-    if (!formData.diagnosis.trim()) errs.diagnosis = 'Required';
-    if (!formData.treatingDoctor.trim()) errs.treatingDoctor = 'Required';
-
-    if (schema === 'ECHS') {
-      if (!formData.smartCardNumber.trim()) errs.smartCardNumber = 'Required';
-      if (!formData.serviceNumber.trim()) errs.serviceNumber = 'Required';
-      if (cat === 'Normal' && !formData.estimatedCost.trim()) errs.estimatedCost = 'Required';
-    }
-    if (schema === 'CGHS') {
-      if (!formData.beneficiaryCategory) errs.beneficiaryCategory = 'Required';
-      if (!formData.cghsCardNumber.trim()) errs.cghsCardNumber = 'Required';
-    }
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+    setErrors({});
+    return true;
   };
 
   const handleContinue = () => {
@@ -93,13 +75,6 @@ const Step1CaseForm = ({ formData, onChange, onNext }: Props) => {
 
   return (
     <motion.div {...fadeIn} className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Building2 className="w-6 h-6 text-primary" />
-          <span className="text-lg font-semibold text-foreground">Sarvodaya Hospital</span>
-        </div>
-      </div>
 
       {/* Schema Selector */}
       <div className="flex justify-center">
@@ -108,9 +83,8 @@ const Step1CaseForm = ({ formData, onChange, onNext }: Props) => {
             <button
               key={s}
               onClick={() => setSchema(s)}
-              className={`px-6 py-2 rounded-md text-sm font-semibold transition-all ${
-                schema === s ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-6 py-2 rounded-md text-sm font-semibold transition-all ${schema === s ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                }`}
             >
               {s}
             </button>
@@ -124,7 +98,7 @@ const Step1CaseForm = ({ formData, onChange, onNext }: Props) => {
           {schema === 'CGHS' && (
             <div className="gov-section">
               <SectionTitle title="Beneficiary Category" />
-              <Field label="Category" required>
+              <Field label="Category">
                 <select className="gov-select" value={formData.beneficiaryCategory} onChange={set('beneficiaryCategory')}>
                   <option value="">Select category</option>
                   {CGHS_BENEFICIARY_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -138,18 +112,18 @@ const Step1CaseForm = ({ formData, onChange, onNext }: Props) => {
           <div className="gov-section">
             <SectionTitle title="Beneficiary Details" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Full Name" required>
+              <Field label="Full Name">
                 <input className="gov-input" value={formData.fullName} onChange={set('fullName')} placeholder="Enter full name" />
                 {errors.fullName && <p className="text-xs text-destructive mt-1">{errors.fullName}</p>}
               </Field>
 
               {schema === 'ECHS' ? (
                 <>
-                  <Field label="ECHS Smart Card Number" required>
+                  <Field label="ECHS Smart Card Number">
                     <input className="gov-input" value={formData.smartCardNumber} onChange={set('smartCardNumber')} placeholder="Card number" />
                     {errors.smartCardNumber && <p className="text-xs text-destructive mt-1">{errors.smartCardNumber}</p>}
                   </Field>
-                  <Field label="Service Number" required>
+                  <Field label="Service Number">
                     <input className="gov-input" value={formData.serviceNumber} onChange={set('serviceNumber')} placeholder="Service number" />
                     {errors.serviceNumber && <p className="text-xs text-destructive mt-1">{errors.serviceNumber}</p>}
                   </Field>
@@ -173,7 +147,7 @@ const Step1CaseForm = ({ formData, onChange, onNext }: Props) => {
                 </>
               ) : (
                 <>
-                  <Field label="CGHS Card Number" required>
+                  <Field label="CGHS Card Number">
                     <input className="gov-input" value={formData.cghsCardNumber} onChange={set('cghsCardNumber')} placeholder="Card number" />
                     {errors.cghsCardNumber && <p className="text-xs text-destructive mt-1">{errors.cghsCardNumber}</p>}
                   </Field>
@@ -201,7 +175,7 @@ const Step1CaseForm = ({ formData, onChange, onNext }: Props) => {
                 </>
               )}
 
-              <Field label="Mobile Number" required>
+              <Field label="Mobile Number">
                 <input className="gov-input" value={formData.mobileNumber} onChange={set('mobileNumber')} placeholder="10-digit mobile" />
                 {errors.mobileNumber && <p className="text-xs text-destructive mt-1">{errors.mobileNumber}</p>}
               </Field>
@@ -229,7 +203,7 @@ const Step1CaseForm = ({ formData, onChange, onNext }: Props) => {
           <div className="gov-section">
             <SectionTitle title="Treatment Category" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Category" required>
+              <Field label="Category">
                 <select
                   className="gov-select"
                   value={formData.treatmentCategory}
@@ -258,33 +232,33 @@ const Step1CaseForm = ({ formData, onChange, onNext }: Props) => {
           <div className="gov-section">
             <SectionTitle title="Hospital & Admission Details" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Hospital Name" required>
+              <Field label="Hospital Name">
                 <input className="gov-input" value={formData.hospitalName} onChange={set('hospitalName')} placeholder="Hospital name" />
                 {errors.hospitalName && <p className="text-xs text-destructive mt-1">{errors.hospitalName}</p>}
               </Field>
               <Field label="Empanelment Code">
                 <input className="gov-input" value={formData.empanelmentCode} onChange={set('empanelmentCode')} placeholder="Code" />
               </Field>
-              <Field label="Admission Date" required>
+              <Field label="Admission Date">
                 <input className="gov-input" type="date" value={formData.admissionDate} onChange={set('admissionDate')} />
                 {errors.admissionDate && <p className="text-xs text-destructive mt-1">{errors.admissionDate}</p>}
               </Field>
               <Field label="Expected Discharge Date">
                 <input className="gov-input" type="date" value={formData.expectedDischargeDate} onChange={set('expectedDischargeDate')} />
               </Field>
-              <Field label="Diagnosis" required>
+              <Field label="Diagnosis">
                 <input className="gov-input" value={formData.diagnosis} onChange={set('diagnosis')} placeholder="Primary diagnosis" />
                 {errors.diagnosis && <p className="text-xs text-destructive mt-1">{errors.diagnosis}</p>}
               </Field>
               <Field label="Provisional Diagnosis Code">
                 <input className="gov-input" value={formData.diagnosisCode} onChange={set('diagnosisCode')} placeholder="ICD code" />
               </Field>
-              <Field label="Treating Doctor Name" required>
+              <Field label="Treating Doctor Name">
                 <input className="gov-input" value={formData.treatingDoctor} onChange={set('treatingDoctor')} placeholder="Doctor name" />
                 {errors.treatingDoctor && <p className="text-xs text-destructive mt-1">{errors.treatingDoctor}</p>}
               </Field>
               {((schema === 'ECHS' && cat === 'Normal') || schema === 'CGHS') && (
-                <Field label="Estimated Cost" required={schema === 'ECHS' && cat === 'Normal'}>
+                <Field label="Estimated Cost">
                   <input className="gov-input" value={formData.estimatedCost} onChange={set('estimatedCost')} placeholder="₹" />
                   {errors.estimatedCost && <p className="text-xs text-destructive mt-1">{errors.estimatedCost}</p>}
                 </Field>
