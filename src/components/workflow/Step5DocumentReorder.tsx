@@ -19,6 +19,7 @@ interface PdfSegment {
 interface DetectedError {
   id: number;
   message: string;
+  targetPage?: number;
 }
 
 interface BackendResponse {
@@ -30,10 +31,10 @@ interface BackendResponse {
 const SIMULATED_BACKEND: BackendResponse = {
   totalGeneratedPdfs: 22,
   files: [
-    { id: 1, name: 'Aadhaar Card PDF', pages: 2 },
-    { id: 2, name: 'PAN Card PDF', pages: 1 },
-    { id: 3, name: 'CT-Scan Report PDF', pages: 5 },
-    { id: 4, name: 'Discharge Summary PDF', pages: 3 },
+    { id: 1, name: 'PAN Card PDF', pages: 1 },
+    { id: 2, name: 'Discharge Summary PDF', pages: 2 },
+    { id: 3, name: 'Aadhaar Card PDF', pages: 2 },
+    { id: 4, name: 'CT-Scan Report PDF', pages: 5 },
     { id: 5, name: 'Admission Note PDF', pages: 2 },
     { id: 6, name: 'Lab Reports PDF', pages: 4 },
     { id: 7, name: 'Prescription PDF', pages: 1 },
@@ -41,8 +42,8 @@ const SIMULATED_BACKEND: BackendResponse = {
     { id: 9, name: 'Final Bill PDF', pages: 2 },
   ],
   detectedErrors: [
-    { id: 1, message: 'Aadhaar Card PDF not detected.' },
-    { id: 2, message: 'Referral Letter missing signature.' },
+    { id: 1, message: 'Aadhaar Card PDF not detected.', targetPage: 4 },
+    { id: 2, message: 'Referral Letter missing signature.', targetPage: 19 },
   ],
 };
 
@@ -110,13 +111,15 @@ const SortableCard = ({ segment, order }: { segment: PdfSegment; order: number }
 };
 
 // --- Simulated PDF Page ---
-const SimulatedPdfPage = ({ segmentName, pageNum, globalPage, totalPages }: {
+const SimulatedPdfPage = ({ segmentName, pageNum, globalPage, totalPages, isHighlighted }: {
   segmentName: string;
   pageNum: number;
   globalPage: number;
   totalPages: number;
+  isHighlighted?: boolean;
 }) => (
-  <div className="w-[794px] min-h-[1123px] bg-card rounded-lg border border-border shadow-md mx-auto flex flex-col">
+  <div className={`w-[794px] min-h-[1123px] bg-card rounded-lg border-2 transition-all duration-700 mx-auto flex flex-col ${isHighlighted ? 'border-primary ring-8 ring-primary/10 shadow-[0_0_50px_rgba(59,130,246,0.2)]' : 'border-border shadow-md'
+    }`}>
     {/* Page Header */}
     <div className="text-center pt-6 pb-3 border-b border-border mx-6">
       <p className="text-sm font-semibold text-foreground">{segmentName}</p>
@@ -195,6 +198,7 @@ const Step5DocumentReorder = ({ documents: _docs }: Props) => {
   const [errorsDismissed, setErrorsDismissed] = useState(false);
   const [showOverrideModal, setShowOverrideModal] = useState(false);
   const [phase, setPhase] = useState<'reorder' | 'generating' | 'done'>('reorder');
+  const [highlightedPage, setHighlightedPage] = useState<number | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -226,6 +230,15 @@ const Step5DocumentReorder = ({ documents: _docs }: Props) => {
   const handleRegenerate = () => {
     setPhase('generating');
     setTimeout(() => setPhase('done'), 3000);
+  };
+
+  const scrollToPage = (pageNum: number) => {
+    const element = document.getElementById(`pdf-page-${pageNum}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setHighlightedPage(pageNum);
+      setTimeout(() => setHighlightedPage(null), 3000);
+    }
   };
 
   // Build preview pages
@@ -333,9 +346,19 @@ const Step5DocumentReorder = ({ documents: _docs }: Props) => {
 
                 <ul className="space-y-1">
                   {errors.map(err => (
-                    <li key={err.id} className="flex items-start gap-2 text-xs text-foreground">
-                      <span className="mt-1 w-1 h-1 rounded-full bg-destructive shrink-0" />
-                      {err.message}
+                    <li key={err.id}>
+                      <button
+                        onClick={() => err.targetPage && scrollToPage(err.targetPage)}
+                        className="flex items-start gap-2 text-xs text-foreground hover:text-primary transition-colors text-left w-full group/err"
+                      >
+                        <span className="mt-1 w-1 h-1 rounded-full bg-destructive shrink-0 group-hover/err:scale-150 transition-transform" />
+                        <span className="flex-1 underline decoration-destructive/30 underline-offset-2 decoration-dotted group-hover/err:decoration-primary">
+                          {err.message}
+                        </span>
+                        {err.targetPage && (
+                          <span className="text-[10px] opacity-50 font-bold uppercase shrink-0"> Check Pg {err.targetPage} For Verification   </span>
+                        )}
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -383,12 +406,18 @@ const Step5DocumentReorder = ({ documents: _docs }: Props) => {
 
               <div className="max-h-[75vh] overflow-y-auto space-y-12 px-1 py-2">
                 {previewPages.map((page, idx) => (
-                  <motion.div key={`${page.segmentName}-${page.pageNum}`} layout transition={{ duration: 0.3 }}>
+                  <motion.div
+                    id={`pdf-page-${page.globalPage}`}
+                    key={`${page.segmentName}-${page.pageNum}`}
+                    layout
+                    transition={{ duration: 0.3 }}
+                  >
                     <SimulatedPdfPage
                       segmentName={page.segmentName}
                       pageNum={page.pageNum}
                       globalPage={page.globalPage}
                       totalPages={totalPages}
+                      isHighlighted={highlightedPage === page.globalPage}
                     />
                   </motion.div>
                 ))}
