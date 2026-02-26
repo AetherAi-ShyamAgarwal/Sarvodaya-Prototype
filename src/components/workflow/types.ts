@@ -42,6 +42,7 @@ export interface DocumentItem {
   status: 'pending' | 'uploaded' | 'verified';
   file?: File | null;
   section: string;
+  foundInHIS?: boolean;
 }
 
 export interface FormData {
@@ -110,13 +111,14 @@ export interface FormData {
   isEmergencyDialysis: string;
   // Cashless
   isCashless: string;
+  ipNumber: string;
 }
 
 export const initialFormData: FormData = {
   schema: 'ECHS',
   fullName: '', smartCardNumber: '', serviceNumber: '', rank: '', branch: '', ppoNumber: '',
   polyclinicName: '', mobileNumber: '', aadhaarNumber: '', relationship: '',
-  treatmentCategory: '', treatmentSubcategory: '',
+  treatmentCategory: 'Normal', treatmentSubcategory: '',
   hospitalName: '', empanelmentCode: '', admissionDate: '', expectedDischargeDate: '',
   diagnosis: '', diagnosisCode: '', treatingDoctor: '', estimatedCost: '',
   emergencyAdmissionTime: '', intimationSentToECHS: '', intimationDateTime: '',
@@ -129,6 +131,7 @@ export const initialFormData: FormData = {
   emergencyType: '', intimationSentToCGHS: '', intimationDate: '',
   cancerType: '', treatmentType: '', estimatedCostPerCycle: '',
   isEmergencyDialysis: '', isCashless: 'Yes',
+  ipNumber: '1234567890',
 };
 
 export type WorkflowStep = 1 | 2 | 3 | 4 | 5;
